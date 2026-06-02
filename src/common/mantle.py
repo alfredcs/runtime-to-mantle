@@ -21,17 +21,24 @@ from openai import OpenAI
 
 
 def _resolve_region(region: str | None) -> str:
-    """Explicit argument wins; fall back to env; final fallback us-east-1."""
-    return region or os.environ.get("AWS_REGION") or "us-east-1"
+    """Explicit argument wins; fall back to env; final fallback us-west-2."""
+    return region or os.environ.get("AWS_REGION") or "us-west-2"
 
 
 @dataclass(frozen=True)
 class MantleConfig:
-    region: str = "us-east-1"
+    region: str = "us-west-2"
 
     @property
     def openai_base_url(self) -> str:
+        # OSS models (openai.gpt-oss-*) are served on the native Mantle surface.
         return f"https://bedrock-mantle.{self.region}.api.aws/v1"
+
+    @property
+    def openai_frontier_base_url(self) -> str:
+        # Frontier OpenAI models (e.g. openai.gpt-5.4) live behind the
+        # OpenAI-passthrough surface at /openai/v1.
+        return f"https://bedrock-mantle.{self.region}.api.aws/openai/v1"
 
     @property
     def anthropic_base_url(self) -> str:
@@ -54,16 +61,33 @@ def bearer_token(region: str | None = None) -> str:
     return provide_token()
 
 
-def openai_client(region: str | None = None, api_key: str | None = None) -> OpenAI:
-    """Return an ``openai.OpenAI`` instance pointed at Mantle."""
+def openai_client(
+    region: str | None = None,
+    api_key: str | None = None,
+    *,
+    frontier: bool = False,
+) -> OpenAI:
+    """Return an ``openai.OpenAI`` instance pointed at Mantle.
+
+    Set ``frontier=True`` for frontier OpenAI models (e.g. ``openai.gpt-5.4``),
+    which are served on the ``/openai/v1`` surface. The default ``/v1`` surface
+    serves the OSS models (``openai.gpt-oss-*``).
+    """
     region = _resolve_region(region)
     cfg = MantleConfig(region=region)
-    return OpenAI(base_url=cfg.openai_base_url, api_key=api_key or bearer_token(region))
+    base_url = cfg.openai_frontier_base_url if frontier else cfg.openai_base_url
+    return OpenAI(base_url=base_url, api_key=api_key or bearer_token(region))
 
 
-def anthropic_client(region: str | None = None) -> AnthropicBedrockMantle:
-    """Return an ``AnthropicBedrockMantle`` client for ``/anthropic/v1/messages``."""
-    return AnthropicBedrockMantle(aws_region=_resolve_region(region))
+def anthropic_client(region: str | None = None, api_key: str | None = None) -> AnthropicBedrockMantle:
+    """Return an ``AnthropicBedrockMantle`` client for ``/anthropic/v1/messages``.
+
+    Authenticate with a minted Bedrock bearer token (same as the OpenAI client)
+    rather than the default AWS SigV4 credential chain — passing ``api_key``
+    forces bearer-token auth.
+    """
+    region = "us-east-1" #_resolve_region(region)
+    return AnthropicBedrockMantle(aws_region=region, api_key=api_key or bearer_token(region))
 
 
 # Model IDs used in the workshop (mirror the playbook Programmatic Access tables).
