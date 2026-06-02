@@ -69,5 +69,6 @@ def anthropic_client(region: str | None = None) -> AnthropicBedrockMantle:
 # Model IDs used in the workshop (mirror the playbook Programmatic Access tables).
 GPT_OSS_120B = "openai.gpt-oss-120b"
 GPT_OSS_20B = "openai.gpt-oss-20b"
+GPT_5_4 = "openai.gpt-5.4"
 CLAUDE_OPUS_47 = "anthropic.claude-opus-4-7"
 CLAUDE_HAIKU_45 = "anthropic.claude-haiku-4-5"

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mantle Studio — one endpoint, three APIs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+<!-- ============================ TOP BAR ============================ -->
+<header class="topbar">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22d3ee"/>
+        </linearGradient>
+      </defs>
+      <path d="M4 22 C 10 8, 22 8, 28 22" fill="none" stroke="url(#g)" stroke-width="2.4"/>
+      <path d="M7 24 C 12 14, 20 14, 25 24" fill="none" stroke="url(#g)" stroke-width="2.4" opacity=".7"/>
+      <path d="M11 26 C 14 20, 18 20, 21 26" fill="none" stroke="url(#g)" stroke-width="2.4" opacity=".45"/>
+    </svg>
+    <div>
+      <div class="brand-name">Mantle&nbsp;Studio</div>
+      <div class="brand-sub">Amazon Bedrock · unified inference</div>
+    </div>
+  </div>
+
+  <div class="endpoint-bar" title="The single entry point for all three APIs">
+    <span class="dot"></span>
+    <span class="endpoint-label">POST</span>
+    <code id="endpointHost">bedrock-mantle.us-east-1.api.aws</code>
+    <span class="endpoint-paths">/v1/chat/completions · /v1/responses · /anthropic/v1/messages</span>
+  </div>
+
+  <div class="topbar-right">
+    <label class="region-pick">
+      <span>Region</span>
+      <select id="regionSelect"></select>
+    </label>
+    <span id="modeBadge" class="mode-badge demo" title="">DEMO</span>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- ============================ NAV RAIL ============================ -->
+  <nav class="rail">
+    <button class="nav-item active" data-view="overview"><span class="ni">◎</span>Overview</button>
+    <div class="rail-group">Customer journey</div>
+    <button class="nav-item" data-view="triage">
+      <span class="ni" style="color:#3b82f6">①</span>Triage
+      <span class="nav-tag">Chat Completions</span>
+    </button>
+    <button class="nav-item" data-view="concierge">
+      <span class="ni" style="color:#a855f7">②</span>Concierge
+      <span class="nav-tag">Responses</span>
+    </button>
+    <button class="nav-item" data-view="analyst">
+      <span class="ni" style="color:#f0883e">③</span>Analyst
+      <span class="nav-tag">Messages</span>
+    </button>
+    <div class="rail-group">Decide &amp; justify</div>
+    <button class="nav-item" data-view="compare"><span class="ni">⇄</span>Compare</button>
+    <button class="nav-item" data-view="value"><span class="ni">$</span>Business value</button>
+    <div class="rail-foot">
+      <div class="rail-foot-title">Why this matters</div>
+      One <code>base_url</code> reaches every model and every API style.
+      Pick the surface that fits the job — not the other way around.
+    </div>
+  </nav>
+
+  <!-- ============================ VIEWS ============================ -->
+  <main id="view">
+
+    <!-- ---------- OVERVIEW ---------- -->
+    <section class="view active" id="view-overview">
+      <div class="hero">
+        <div class="hero-eyebrow">AMAZON BEDROCK · POWERED BY AWS MANTLE</div>
+        <h1>One endpoint.<br><span class="grad">Three APIs.</span> Zero rewrites.</h1>
+        <p class="hero-lede">
+          <code>bedrock-mantle.{region}.api.aws</code> is a single, OpenAI- and Anthropic-compatible
+          inference entry point. The same host, key and SDK reach a multi-vendor model catalog —
+          you just choose the API <em>style</em> that fits each task.
+        </p>
+        <div class="hero-cta">
+          <button class="btn primary" data-goto="triage">Open the live consoles →</button>
+          <button class="btn ghost" data-goto="compare">See all three, side by side</button>
+        </div>
+        <div class="hero-stats">
+          <div><b id="statModels">10</b><span>models</span></div>
+          <div><b id="statRegions">13</b><span>regions</span></div>
+          <div><b>3</b><span>API styles</span></div>
+          <div><b>1</b><span>base_url change</span></div>
+        </div>
+      </div>
+
+      <!-- unified endpoint diagram -->
+      <div class="diagram">
+        <div class="diagram-endpoint">
+          <span class="dot"></span> <code id="diagramHost">bedrock-mantle.us-east-1.api.aws</code>
+          <span class="diagram-endpoint-sub">one host · one Bearer token · one SDK</span>
+        </div>
+        <div class="diagram-stems"><i></i><i></i><i></i></div>
+        <div class="surface-cards" id="surfaceCards"><!-- injected --></div>
+      </div>
+
+      <!-- value pillars -->
+      <div class="pillars">
+        <div class="pillar">
+          <div class="pillar-ic">⚡</div><h3>OpenAI SDK compatible</h3>
+          <p>Point the OpenAI or Anthropic SDK at one <code>base_url</code>. Most call sites are a
+            <b>base_url + key + model-ID</b> change.</p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-ic">🛠️</div><h3>Server-side tool use</h3>
+          <p>The Responses API can run the <b>entire tool loop</b> for you — Lambda/MCP connectors
+            execute server-side and you get the final answer.</p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-ic">🧵</div><h3>Stateful conversations</h3>
+          <p>Pass <code>previous_response_id</code> and the server reconstructs context. Stop
+            shipping the whole transcript on every turn.</p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-ic">🛡️</div><h3>Zero-Operator-Access</h3>
+          <p>A Nitro-style security architecture: no training on your inputs by default,
+            customer-owned KMS via Projects.</p>
+        </div>
+      </div>
+
+      <!-- migration diff -->
+      <div class="panel diffpanel">
+        <div class="panel-head">
+          <h3>The migration is the punchline</h3>
+          <span class="muted">Converse on <code>bedrock-runtime</code> → Chat Completions on <code>bedrock-mantle</code></span>
+        </div>
+        <div class="diff">
+          <pre class="code before"><span class="tag-before">BEFORE · bedrock-runtime</span><code id="codeBefore"></code></pre>
+          <pre class="code after"><span class="tag-after">AFTER · bedrock-mantle</span><code id="codeAfter"></code></pre>
+        </div>
+        <div class="diff-note">Same prompt, same params. The diff is the endpoint, the auth, and the model ID — typically <b>0.5–1 day</b> of work, dark-launchable behind a single <code>USE_MANTLE=1</code> flag.</div>
+      </div>
+    </section>
+
+    <!-- ---------- TRIAGE (chat completions) ---------- -->
+    <section class="view" id="view-triage">
+      <div class="console-head">
+        <div>
+          <div class="console-kicker" style="color:#3b82f6">STAGE ① · CHAT COMPLETIONS · STATELESS</div>
+          <h2>Triage every inbound message</h2>
+          <p class="muted">High volume, text-only, no memory needed. Classify intent, sentiment and
+            priority and route the ticket — the cheapest, fastest surface, with full client control.</p>
+        </div>
+      </div>
+      <div class="console">
+        <div class="console-left">
+          <div class="field-row">
+            <label>Model</label>
+            <div class="model-pills" id="triageModels"></div>
+          </div>
+          <textarea id="triageInput" class="prompt" rows="3"
+            placeholder="Paste an inbound customer message…"></textarea>
+          <div class="chips" id="triageChips"></div>
+          <button class="btn primary block" id="triageSend">Classify &amp; route →</button>
+
+          <div id="triageResult" class="result-card hidden">
+            <div class="triage-grid" id="triageGrid"></div>
+            <div class="triage-macro" id="triageMacro"></div>
+          </div>
+
+          <div class="model-econ">
+            <div class="model-econ-head">Estimated cost for this message, by model
+              <span class="muted">· illustrative</span></div>
+            <div id="modelEcon" class="econ-bars"></div>
+          </div>
+        </div>
+        <aside class="wire" id="triageWire"></aside>
+      </div>
+    </section>
+
+    <!-- ---------- CONCIERGE (responses) ---------- -->
+    <section class="view" id="view-concierge">
+      <div class="console-head">
+        <div>
+          <div class="console-kicker" style="color:#a855f7">STAGE ② · RESPONSES API · STATEFUL</div>
+          <h2>Concierge that actually remembers</h2>
+          <p class="muted">A multi-turn agent. The server keeps the conversation
+            (<code>previous_response_id</code>) and runs tools server-side. Watch the request body
+            on turn 2+: it carries <b>no transcript</b>.</p>
+        </div>
+        <button class="btn ghost small" id="conciergeReset">↺ Reset conversation</button>
+      </div>
+      <div class="console">
+        <div class="console-left">
+          <div class="field-row">
+            <label>Model</label>
+            <div class="model-pills" id="conciergeModels"></div>
+          </div>
+          <div id="memoryBanner" class="memory-banner hidden"></div>
+          <div id="thread" class="thread"></div>
+          <div class="chips" id="conciergeChips"></div>
+          <div class="composer">
+            <textarea id="conciergeInput" class="prompt" rows="2"
+              placeholder="Message the concierge…"></textarea>
+            <button class="btn primary" id="conciergeSend">Send</button>
+          </div>
+        </div>
+        <aside class="wire" id="conciergeWire"></aside>
+      </div>
+    </section>
+
+    <!-- ---------- ANALYST (messages) ---------- -->
+    <section class="view" id="view-analyst">
+      <div class="console-head">
+        <div>
+          <div class="console-kicker" style="color:#f0883e">STAGE ③ · MESSAGES API · ANTHROPIC-NATIVE</div>
+          <h2>Claude assists the human agent</h2>
+          <p class="muted">The hard cases escalate. The Messages API sends rich <b>typed content</b>
+            (text + the customer's photo) and returns <b>visible thinking</b> plus a structured
+            resolution — full Anthropic fidelity.</p>
+        </div>
+      </div>
+      <div class="console">
+        <div class="console-left">
+          <div class="field-row">
+            <label>Model</label>
+            <div class="model-pills" id="analystModels"></div>
+          </div>
+          <div class="casefile">
+            <div class="casefile-head">📎 Attached case file</div>
+            <div class="casefile-body">
+              <div class="casefile-photo" title="customer-uploaded photo (typed image content)">
+                <svg viewBox="0 0 80 60"><rect width="80" height="60" rx="6"/>
+                  <path d="M8 44 L30 22 L44 36 L56 26 L72 44 Z" fill="#2a3142"/>
+                  <line x1="20" y1="30" x2="60" y2="50" stroke="#f0883e" stroke-width="2.5"/>
+                  <line x1="60" y1="30" x2="38" y2="44" stroke="#f0883e" stroke-width="2.5"/>
+                </svg>
+                <span>snapped_pole.jpg</span>
+              </div>
+              <div class="casefile-meta">
+                <div><b>Order</b> NW-100423</div>
+                <div><b>Item</b> Cirrus 2P Tent</div>
+                <div><b>Issue</b> Pole snapped, first setup</div>
+              </div>
+            </div>
+          </div>
+          <textarea id="analystInput" class="prompt" rows="2"></textarea>
+          <button class="btn primary block" id="analystSend">Analyze case →</button>
+
+          <div id="thinkingPanel" class="thinking hidden">
+            <div class="thinking-head"><span class="spark">✦</span> Extended thinking
+              <button id="thinkingToggle" class="link">hide</button></div>
+            <div id="thinkingBody" class="thinking-body"></div>
+          </div>
+          <div id="analystAnswer" class="answer hidden"></div>
+        </div>
+        <aside class="wire" id="analystWire"></aside>
+      </div>
+    </section>
+
+    <!-- ---------- COMPARE ---------- -->
+    <section class="view" id="view-compare">
+      <div class="console-head">
+        <div>
+          <div class="console-kicker">SAME PROMPT · THREE SURFACES</div>
+          <h2>One request, compared three ways</h2>
+          <p class="muted">Send an identical prompt through each surface and see how the request
+            shape, statefulness and response differ — the decision in one screen.</p>
+        </div>
+      </div>
+      <div class="compare-input">
+        <input id="compareInput" type="text"
+          value="My tent pole snapped the first time I set it up. Order NW-100423. This is unacceptable." />
+        <button class="btn primary" id="compareRun">Run all three →</button>
+      </div>
+      <div id="compareCols" class="compare-cols"></div>
+      <div class="panel">
+        <div class="panel-head"><h3>Key differences</h3>
+          <span class="muted">the shape changes even though the host doesn't</span></div>
+        <div class="cmp-table-wrap"><table class="cmp-table" id="cmpTable"></table></div>
+      </div>
+    </section>
+
+    <!-- ---------- BUSINESS VALUE ---------- -->
+    <section class="view" id="view-value">
+      <div class="console-head">
+        <div>
+          <div class="console-kicker">THE BUSINESS CASE</div>
+          <h2>Why the contact center runs on Mantle</h2>
+          <p class="muted">Illustrative figures for a mid-size retailer handling ~50k support
+            contacts / month. Numbers are for demonstration, not an AWS quote.</p>
+        </div>
+      </div>
+      <div class="kpis" id="kpis"></div>
+      <div class="value-grid">
+        <div class="panel">
+          <div class="panel-head"><h3>Cost per 1,000 triage calls</h3><span class="muted">illustrative</span></div>
+          <div id="costChart" class="bars"></div>
+          <div class="muted small">Same stateless task, swapped across the multi-vendor catalog — one
+            line of code. Pick the model that hits your quality bar for the lowest cost.</div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Right tool for each job</h3></div>
+          <div id="surfaceRecap" class="recap"></div>
+        </div>
+        <div class="panel migrate">
+          <div class="panel-head"><h3>Migration effort</h3></div>
+          <div class="migrate-big">0.5–1 <span>day</span></div>
+          <p>to move a Converse call site to Chat Completions: <b>base_url + key + model-ID</b>.
+            Dark-launch behind <code>USE_MANTLE=1</code>; roll back with one env-var flip.</p>
+          <div class="migrate-pills">
+            <span>✅ Lift-and-shift</span><span>🟡 Verify feature parity</span><span>🔴 Re-architect</span>
+          </div>
+        </div>
+        <div class="panel honest">
+          <div class="panel-head"><h3>Keep <code>bedrock-runtime</code> when…</h3></div>
+          <ul>
+            <li>You need Amazon Nova / Titan, Llama, Cohere (not on Mantle)</li>
+            <li>Batch inference, bidirectional speech streaming, or GovCloud</li>
+            <li>Native Guardrails / Knowledge Bases / Agents / Flows integration</li>
+          </ul>
+          <div class="muted small">The honest answer for most enterprises is a <b>hybrid</b>: route
+            Mantle-compatible traffic to Mantle behind an abstraction, keep runtime for the rest.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="/app.js"></script>
+</body>
+</html>
