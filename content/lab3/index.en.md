@@ -48,6 +48,7 @@ through what every call site has to become.
 
 - TTFT and tokens-per-second for Mantle Chat Completions vs runtime
   ConverseStream, head-to-head.
+- Mantle vs Runtime API performance and accuracy comparison
 - Statistical gotchas — cold starts, diurnal variance, apples-to-apples
   model selection.
 - Optional matplotlib histogram.
